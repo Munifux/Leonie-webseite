@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy 18th, Leonie! 🎂</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --gold: #d4a84b;
+      --gold-light: #f0c96a;
+      --gold-pale: #fef3d0;
+      --night: #0a0a18;
+      --deep: #10102a;
+      --mid: #1a1a3e;
+      --soft: #2a2a5a;
+      --text: #f5ede0;
+      --muted: rgba(245, 237, 224, 0.55);
+      --accent: #e8a0bf;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--night);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ─── Custom Cursor ─── */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transition: all 0.15s ease;
+      opacity: 0.6;
+    }
+
+    /* ─── Canvas Stars ─── */
+    #starfield {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── SECTION 1: Hero ─── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .hero-tag {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 1s 0.3s forwards;
+    }
+
+    .hero-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 12vw, 9rem);
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      opacity: 0;
+      animation: fadeUp 1.2s 0.6s forwards;
+    }
+
+    .hero-name em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .hero-eighteen {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(6rem, 22vw, 18rem);
+      font-weight: 600;
+      line-height: 0.85;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold-pale) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      animation: fadeUp 1.2s 0.9s forwards;
+      position: relative;
+    }
+
+    .hero-date {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2rem;
+      opacity: 0;
+      animation: fadeUp 1s 1.2s forwards;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 1s 2s forwards;
+    }
+    .scroll-hint span {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .scroll-arrow {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: scrollPulse 2s infinite;
+    }
+
+    /* ─── SECTION 2: Countdown ─── */
+    #countdown-section {
+      position: relative;
+      z-index: 1;
+      padding: 8rem 2rem;
+      text-align: center;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 4rem;
+    }
+
+    .countdown-grid {
+      display: flex;
+      justify-content: center;
+      gap: clamp(1.5rem, 4vw, 4rem);
+      flex-wrap: wrap;
+    }
+
+    .countdown-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .countdown-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      font-weight: 300;
+      line-height: 1;
+      background: linear-gradient(to bottom, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      min-width: 2ch;
+      text-align: center;
+    }
+
+    .countdown-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .countdown-sep {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      color: var(--gold);
+      opacity: 0.3;
+      align-self: flex-start;
+      padding-top: 0.2em;
+    }
+
+    .birthday-message {
+      display: none;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-style: italic;
+      color: var(--gold-light);
+      animation: pulse 2s infinite;
+    }
+
+    /* ─── SECTION 3: Reasons ─── */
+    #reasons-section {
+      position: relative;
+      z-index: 1;
+      padding: 8rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .reason-card {
+      position: relative;
+      max-width: 580px;
+      padding: 3rem 3.5rem;
+      border: 1px solid rgba(212, 168, 75, 0.2);
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(26,26,62,0.8) 0%, rgba(16,16,42,0.9) 100%);
+      backdrop-filter: blur(10px);
+      margin: 3rem 0;
+      transition: border-color 0.3s;
+    }
+
+    .reason-card:hover { border-color: rgba(212, 168, 75, 0.5); }
+
+    .reason-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+
+    .reason-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.6;
+      color: var(--text);
+      min-height: 4rem;
+      transition: opacity 0.3s;
+    }
+
+    .corner {
+      position: absolute;
+      width: 12px; height: 12px;
+      border-color: var(--gold);
+      border-style: solid;
+      opacity: 0.6;
+    }
+    .corner-tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+    .corner-tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
+    .corner-bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
+    .corner-br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+    .reason-btn {
+      margin-top: 1rem;
+      padding: 1rem 3rem;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reason-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+      z-index: 0;
+    }
+
+    .reason-btn:hover::before { transform: scaleX(1); }
+    .reason-btn:hover { color: var(--night); }
+    .reason-btn span { position: relative; z-index: 1; }
+
+    .reason-counter {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-top: 1.5rem;
+    }
+
+    /* ─── SECTION 4: Final ─── */
+    #final-section {
+      position: relative;
+      z-index: 1;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem;
+    }
+
+    .final-from {
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .final-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 7vw, 6rem);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 2rem;
+    }
+
+    .final-title strong {
+      font-weight: 600;
+      color: var(--gold-light);
+      font-style: italic;
+    }
+
+    .final-msg {
+      max-width: 480px;
+      font-size: 1rem;
+      line-height: 1.85;
+      color: var(--muted);
+      margin-bottom: 3rem;
+    }
+
+    .final-signature {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-style: italic;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── Floating orbs ─── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(60px);
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(212,168,75,0.08) 0%, transparent 70%);
+      top: -100px; right: -100px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(232,160,191,0.07) 0%, transparent 70%);
+      bottom: 20%; left: -100px;
+    }
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(212,168,75,0.06) 0%, transparent 70%);
+      bottom: -50px; right: 20%;
+    }
+
+    /* ─── Divider ─── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 4rem;
+    }
+    .divider-line { flex: 1; height: 1px; background: rgba(212,168,75,0.2); }
+    .divider-diamond {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      opacity: 0.6;
+    }
+
+    /* ─── Animations ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+    @keyframes floatParticle {
+      0%   { transform: translateY(0) scale(1); opacity: 0.8; }
+      100% { transform: translateY(-100vh) scale(0); opacity: 0; }
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    @keyframes reasonIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reason-animate { animation: reasonIn 0.4s ease forwards; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 600px) {
+      .reason-card { padding: 2rem 1.8rem; }
+      .countdown-sep { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Background orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Starfield -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 1: HERO
+  ═══════════════════════════════════════ -->
+  <section id="hero">
+    <p class="hero-tag">✦ Ein ganz besonderer Tag ✦</p>
+    <h1 class="hero-name"><em>Leonie</em><br>Wurtzreiner</h1>
+    <div class="hero-eighteen">18</div>
+    <p class="hero-date">21. Juni · Das große Achtzehn</p>
+
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 2: COUNTDOWN
+  ═══════════════════════════════════════ -->
+  <section id="countdown-section">
+    <p class="section-label">✦ Noch ein bisschen Geduld ✦</p>
+    <h2 class="section-title">Noch wie lange bis zum großen Tag?</h2>
+
+    <div class="countdown-grid" id="countdown">
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-days">--</div>
+        <div class="countdown-label">Tage</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-hours">--</div>
+        <div class="countdown-label">Stunden</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-mins">--</div>
+        <div class="countdown-label">Minuten</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-item">
+        <div class="countdown-num" id="cd-secs">--</div>
+        <div class="countdown-label">Sekunden</div>
+      </div>
+    </div>
+
+    <div class="birthday-message" id="bday-msg">
+      🎂 Heute ist dein Tag, Leonie! 🎂
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 3: REASONS
+  ═══════════════════════════════════════ -->
+  <section id="reasons-section">
+    <p class="section-label">✦ Für dich ✦</p>
+    <h2 class="section-title">Gründe, warum du<br>einfach wunderbar bist</h2>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+    <div class="reason-card">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+      <p class="reason-number" id="reason-num">Grund Nr. 1 / 18</p>
+      <p class="reason-text" id="reason-text">Dein Lächeln bringt den ganzen Raum zum Leuchten — auch wenn du es selbst gar nicht merkst.</p>
+    </div>
+
+    <button class="reason-btn" id="reason-btn" onclick="nextReason()">
+      <span>Nächster Grund ✦</span>
+    </button>
+    <p class="reason-counter" id="reason-counter">1 von 18 entdeckt</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 4: FINAL
+  ═══════════════════════════════════════ -->
+  <section id="final-section">
+    <p class="final-from">— Eine kleine Überraschung für dich —</p>
+    <h2 class="final-title">
+      Alles Gute zum<br>
+      <strong>18. Geburtstag,<br>Leonie!</strong>
+    </h2>
+    <p class="final-msg">
+      18 Jahre alt zu werden ist der Beginn von etwas Wunderbarem.
+      Du trägst die Welt vor dir — mach sie zu deiner.
+      Ich bin froh, dass ich dich kennen darf. 🌟
+    </p>
+    <div class="final-signature">— Mit den besten Wünschen ✦</div>
+  </section>
+
+  <script>
+    // ─── Cursor ───
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx - 5 + 'px';
+      cursor.style.top = my - 5 + 'px';
+    });
+
+    function animRing() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) *.12;
+      ring.style.left = rx - 18 + 'px';
+      ring.style.top = ry - 18 + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+
+    document.querySelectorAll('button, a').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'scale(2)';
+        ring.style.transform = 'scale(1.4)';
+        ring.style.opacity = '0.3';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'scale(1)';
+        ring.style.transform = 'scale(1)';
+        ring.style.opacity = '0.6';
+      });
+    });
+
+    // ─── Starfield ───
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let W, H;
+
+    function initStars() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      stars = Array.from({ length: 180 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.2,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.012 + 0.004
+      }));
+    }
+
+    function drawStars(t) {
+      ctx.clearRect(0, 0, W, H);
+      stars.forEach(s => {
+        const opacity = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(s.phase + t * s.speed));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(212,168,75,${opacity})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', initStars);
+    initStars();
+    requestAnimationFrame(drawStars);
+
+    // ─── Countdown ───
+    function updateCountdown() {
+      const now = new Date();
+      const target = new Date(now.getFullYear(), 5, 21); // June = month 5
+      if (now > target) target.setFullYear(target.getFullYear() + 1);
+
+      const diff = target - now;
+
+      if (diff <= 0) {
+        document.getElementById('countdown').style.display = 'none';
+        const msg = document.getElementById('bday-msg');
+        msg.style.display = 'block';
+        launchBirthdayConfetti();
+        return;
+      }
+
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
+      document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
+      document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
+      document.getElementById('cd-secs').textContent = String(s).padStart(2, '0');
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // ─── Reasons ───
+    const reasons = [
+      "Dein Lächeln bringt den ganzen Raum zum Leuchten — auch wenn du es selbst gar nicht merkst.",
+      "Du hast ein Herz aus Gold und vergisst dabei nie, auch andere zum Lachen zu bringen.",
+      "Deine Art, die Welt zu sehen, macht alles ein bisschen bunter.",
+      "18 Jahre — und du wächst immer noch über dich selbst hinaus. Respect.",
+      "Du bist die Person, bei der man einfach man selbst sein kann.",
+      "Deine Energie ist ansteckend — auf die allerbeste Art.",
+      "Du vergisst nie, nachzufragen, wie es den anderen geht.",
+      "Man kann sich auf dich verlassen. Das ist Gold wert.",
+      "Dein Humor ist unfair gut — du hast mich immer wieder überrascht.",
+      "Du nimmst Herausforderungen an, auch wenn sie sich groß anfühlen.",
+      "Mit dir macht selbst der langweiligste Tag noch irgendwie Spaß.",
+      "Du schaffst es, Probleme zu lösen, ohne dass jemand überhaupt merkt, wie viel Arbeit da drinsteckt.",
+      "Deine Empathie ist eine deiner größten Stärken.",
+      "Du bist mutig genug, du selbst zu sein — das können nicht viele.",
+      "Du bist neugierig auf das Leben. Das führt noch weit.",
+      "Dein 18. Geburtstag ist erst der Anfang — das Beste kommt noch.",
+      "Die Welt ist ein besserer Ort, weil du darin bist. Wirklich.",
+      "Alles Gute zum Geburtstag, Leonie! Du verdienst jede Freude auf der Welt. 🎂✨",
+    ];
+
+    let currentReason = 0;
+    let discovered = 1;
+
+    function nextReason() {
+      currentReason = (currentReason + 1) % reasons.length;
+      discovered = Math.min(discovered + 1, reasons.length);
+
+      const textEl = document.getElementById('reason-text');
+      const numEl = document.getElementById('reason-num');
+      const counterEl = document.getElementById('reason-counter');
+
+      textEl.style.opacity = '0';
+      setTimeout(() => {
+        textEl.textContent = reasons[currentReason];
+        numEl.textContent = `Grund Nr. ${currentReason + 1} / ${reasons.length}`;
+        counterEl.textContent = `${discovered} von ${reasons.length} entdeckt`;
+        textEl.style.opacity = '1';
+        textEl.classList.remove('reason-animate');
+        void textEl.offsetWidth;
+        textEl.classList.add('reason-animate');
+      }, 250);
+
+      // mini confetti burst
+      confetti({
+        particleCount: 25,
+        spread: 50,
+        origin: { y: 0.6 },
+        colors: ['#d4a84b', '#f0c96a', '#e8a0bf', '#fff'],
+        scalar: 0.8
+      });
+    }
+
+    // ─── Birthday confetti ───
+    function launchBirthdayConfetti() {
+      const duration = 6000;
+      const end = Date.now() + duration;
+      const colors = ['#d4a84b', '#f0c96a', '#e8a0bf', '#ffffff', '#fef3d0'];
+
+      (function frame() {
+        confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors });
+        confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    // ─── Page load confetti ───
+    setTimeout(() => {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.3 },
+        colors: ['#d4a84b', '#f0c96a', '#e8a0bf', '#ffffff'],
+        scalar: 1.1
+      });
+    }, 1800);
+
+    // ─── Scroll reveal ───
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('section:not(#hero) > *').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.9s ease, transform 0.9s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
